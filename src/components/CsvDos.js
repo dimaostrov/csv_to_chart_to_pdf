@@ -1,13 +1,17 @@
 import React from "react";
 import Papa from "papaparse";
 import ReactDataSheet from "react-datasheet";
+import { Button } from "rebass";
 
 class DataController extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      data: []
+      data: [],
+      dataSelect: [],
+      dataToShow: [],
+      currentlyCondensed: false
     };
 
     this.getData = this.getData.bind(this);
@@ -29,8 +33,12 @@ class DataController extends React.Component {
   }
 
   getData(result) {
-    this.setState({ data: result.data });
-    console.log(this.state.data);
+    // here we have data, condensedData (first 10 rows), and currently displaying Data
+    this.setState({
+      data: result.data,
+      dataToShow: result.data,
+      condenseData: result.data.slice(0, 20)
+    });
   }
 
   async getCsvData() {
@@ -41,14 +49,27 @@ class DataController extends React.Component {
     });
   }
 
+  toggleData = () => {
+    this.state.currentlyCondensed
+      ? this.setState({
+          dataToShow: this.state.data,
+          currentlyCondensed: !this.state.currentlyCondensed
+        })
+      : this.setState({
+          dataToShow: this.state.condenseData,
+          currentlyCondensed: !this.state.currentlyCondensed
+        });
+  };
+
   render() {
+    const { data, dataCondensed, dataToShow } = this.state;
     return (
       <section>
         <h2>Data Preview</h2>
-        <ReactDataSheet
-          data={this.state.data}
-          valueRenderer={cell => cell}
-        />
+        <Button onClick={this.toggleData}>
+          {this.state.currentlyCondensed ? "Expand Data":"Condense Data"}
+        </Button>
+        <ReactDataSheet data={dataToShow} valueRenderer={cell => cell} />
       </section>
     );
   }
